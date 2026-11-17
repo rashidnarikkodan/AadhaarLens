@@ -3,20 +3,43 @@ import cors from 'cors';
 import { env } from './config/env.config.js';
 import apiRouter from './routes/index.js';
 import { errorHandler } from './middlewares/errorHandler.js';
+import morgan from 'morgan';
 
 const app: Application = express();
 
-// Middlewares
+const configuredOrigins = (env.CLIENT_URL || '')
+  .split(',')
+  .map((url) => url.trim())
+  .filter(Boolean);
+
 app.use(
   cors({
-    origin: env.CLIENT_URL,
+    origin: (origin, callback) => {
+      if (!origin) {
+        return callback(null, true);
+      }
+
+      const isAllowed =
+        env.NODE_ENV !== 'production' ||
+        configuredOrigins.length === 0 ||
+        configuredOrigins.includes('*') ||
+        configuredOrigins.includes(origin) ||
+        origin.endsWith('.vercel.app');
+
+      if (isAllowed) {
+        return callback(null, true);
+      }
+
+      callback(new Error(`Origin ${origin} not allowed by CORS`));
+    },
     credentials: true,
   })
 );
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(morgan('dev'));
 
-// Root route
 app.get('/', (_req: Request, res: Response) => {
   res.json({
     message: 'Welcome to AadhaarLens API',
@@ -24,10 +47,8 @@ app.get('/', (_req: Request, res: Response) => {
   });
 });
 
-// API Routes
 app.use('/api', apiRouter);
 
-// 404 handler
 app.use((_req: Request, res: Response) => {
   res.status(404).json({
     success: false,
@@ -35,7 +56,6 @@ app.use((_req: Request, res: Response) => {
   });
 });
 
-// Global error handler
 app.use(errorHandler);
 
 export default app;

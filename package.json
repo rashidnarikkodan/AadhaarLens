@@ -8,7 +8,12 @@
     "dev:client": "pnpm --filter client dev",
     "dev:server": "pnpm --filter server dev",
     "build": "pnpm -r build",
+    "build:client": "pnpm --filter client build",
+    "build:server": "pnpm --filter server build",
+    "start": "pnpm --filter server start",
     "lint": "pnpm -r --if-present lint"
-  }
+  },
+  "onlyBuiltDependencies": [
+    "tesseract.js"
+  ]
 }
-
