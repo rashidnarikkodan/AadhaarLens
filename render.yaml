@@ -1,0 +1,15 @@
+services:
+  - type: web
+    name: aadhaarlens-server
+    runtime: node
+    plan: free
+    region: oregon
+    buildCommand: pnpm install && pnpm --filter server build
+    startCommand: pnpm --filter server start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: CLIENT_URL
+        value: https://*.vercel.app
+      - key: GEMINI_API_KEY
+        sync: false
