@@ -13,3 +13,4 @@ services:
         value: https://*.vercel.app
       - key: GEMINI_API_KEY
         sync: false
+
